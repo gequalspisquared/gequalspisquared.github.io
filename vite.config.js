@@ -3,7 +3,6 @@ import restart from "vite-plugin-restart";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: "/",
   plugins: [restart({ restart: ["public/**"] })],
   resolve: {
     alias: {},
