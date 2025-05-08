@@ -1,1 +1,3 @@
 /node_modules*
+# Use git workflows to build, do not include build output
+/dist*
