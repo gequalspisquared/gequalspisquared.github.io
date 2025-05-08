@@ -1,4 +1,4 @@
-import * as THREE from "https://cdn.skypack.dev/three@0.136";
+import * as THREE from "three";
 
 class App {
   constructor() {}
@@ -28,8 +28,8 @@ class App {
   }
 
   async setupProject_() {
-    const vert_shader = await fetch("./../public/resources/shaders/vert.glsl");
-    const frag_shader = await fetch("./../public/resources/shaders/frag.glsl");
+    const vert_shader = await fetch("./resources/shaders/vert.glsl");
+    const frag_shader = await fetch("./resources/shaders/frag.glsl");
 
     const material = new THREE.ShaderMaterial({
       uniforms: {},
