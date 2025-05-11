@@ -22,7 +22,7 @@ class App {
 
     this.camera_ = new THREE.PerspectiveCamera(
       60,
-      1920.0 / 1080.0,
+      window.innerWidth / window.innerHeight,
       0.1,
       1000.0
     );
