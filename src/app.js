@@ -1,10 +1,13 @@
 import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 class App {
   constructor() {}
 
   async init() {
-    this.threejs_ = new THREE.WebGLRenderer();
+    this.threejs_ = new THREE.WebGLRenderer({ antialias: true });
+    // this.threejs_.setPixelRatio(window.devicePixelRatio * 1.5); // AA
     document.body.appendChild(this.threejs_.domElement);
 
     window.addEventListener(
@@ -17,8 +20,29 @@ class App {
 
     this.scene_ = new THREE.Scene();
 
-    this.camera_ = new THREE.OrthographicCamera(0, 1, 1, 0, 0.1, 1000);
-    this.camera_.position.set(0, 0, 1);
+    this.camera_ = new THREE.PerspectiveCamera(
+      60,
+      1920.0 / 1080.0,
+      0.1,
+      1000.0
+    );
+    this.camera_.position.set(1, 0, 3);
+
+    const controls = new OrbitControls(this.camera_, this.threejs_.domElement);
+    controls.target.set(0, 0, 0);
+    controls.update();
+
+    const cubemapLoader = new THREE.CubeTextureLoader();
+    const texture = cubemapLoader.load([
+      "./resources/images/cubemap/Cold_Sunset__Cam_2_Left+X.png",
+      "./resources/images/cubemap/Cold_Sunset__Cam_3_Right-X.png",
+      "./resources/images/cubemap/Cold_Sunset__Cam_4_Up+Y.png",
+      "./resources/images/cubemap/Cold_Sunset__Cam_5_Down-Y.png",
+      "./resources/images/cubemap/Cold_Sunset__Cam_0_Front+Z.png",
+      "./resources/images/cubemap/Cold_Sunset__Cam_1_Back-Z.png",
+    ]);
+
+    this.scene_.background = texture;
 
     await this.setupProject_();
 
@@ -37,32 +61,43 @@ class App {
 
     const material = new THREE.ShaderMaterial({
       uniforms: {
-        diffuse: { value: quincyTexture },
-        resolution: {
-          value: new THREE.Vector2(window.innerWidth, window.innerHeight),
-        },
+        // diffuse: { value: quincyTexture },
+        // resolution: {
+        //   value: new THREE.Vector2(window.innerWidth, window.innerHeight),
+        // },
         time: { value: 0.0 },
+        specMap: { value: this.scene_.background },
       },
       vertexShader: await vert_shader.text(),
       fragmentShader: await frag_shader.text(),
     });
     this.material_ = material;
 
-    const geometry = new THREE.PlaneGeometry(1, 1);
+    // const geometry = new THREE.PlaneGeometry(1, 1);
 
-    const plane = new THREE.Mesh(geometry, material);
-    plane.position.set(0.5, 0.5, 0);
-    this.scene_.add(plane);
+    // const plane = new THREE.Mesh(geometry, material);
+    // plane.position.set(0.5, 0.5, 0);
+    // this.scene_.add(plane);
+
+    const gltfLoader = new GLTFLoader();
+    gltfLoader.setPath("/resources/models/");
+    gltfLoader.load("suzanne.glb", (gltf) => {
+      gltf.scene.traverse((c) => {
+        c.material = material;
+      });
+      this.scene_.add(gltf.scene);
+    });
 
     this.totalTime_ = 0.0;
   }
 
   onWindowResize_() {
     this.threejs_.setSize(window.innerWidth, window.innerHeight);
-    this.material_.uniforms.resolution.value = new THREE.Vector2(
-      window.innerWidth,
-      window.innerHeight
-    );
+    // this.material_.uniforms.resolution.value = new THREE.Vector2(
+    //   window.innerWidth,
+    //   window.innerHeight
+    // );
+    this.camera_.aspect = window.innerWidth / window.innerHeight;
   }
 
   raf_() {
