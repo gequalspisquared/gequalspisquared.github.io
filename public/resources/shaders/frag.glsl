@@ -1,6 +1,7 @@
 varying vec2 vUvs;
 varying vec3 vNormal;
 varying vec3 vPosition;
+varying vec3 vColor;
 
 uniform float time;
 uniform samplerCube specMap;
@@ -15,9 +16,15 @@ float remap(float v, float inMin, float inMax, float outMin, float outMax) {
 }
 
 void main() {
-    vec3 baseColor = vec3(0.5);
+    vec3 baseColor = vColor; // vec3(0.5);
     vec3 lighting = vec3(0.0);
-    vec3 normal = normalize(vNormal); // Must be done due to barycentric interp.
+    // vec3 normal = normalize(vNormal); // Must be done due to barycentric interp.
+    vec3 normal = normalize(
+        cross(
+            dFdx(vPosition.xyz),
+            dFdy(vPosition.xyz)
+        )
+    );
     // cameraPosition comes from 3js
     vec3 viewDir = normalize(cameraPosition - vPosition);
 

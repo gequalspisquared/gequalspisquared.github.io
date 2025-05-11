@@ -79,6 +79,7 @@ class App {
     // plane.position.set(0.5, 0.5, 0);
     // this.scene_.add(plane);
 
+    /*
     const gltfLoader = new GLTFLoader();
     gltfLoader.setPath("/resources/models/");
     gltfLoader.load("suzanne.glb", (gltf) => {
@@ -87,6 +88,17 @@ class App {
       });
       this.scene_.add(gltf.scene);
     });
+    */
+
+    const geometry = new THREE.IcosahedronGeometry(1, 128);
+    const mesh = new THREE.Mesh(geometry, material);
+    this.scene_.add(mesh);
+
+    /*
+    const geometry = new THREE.BoxGeometry(1, 1);
+    const mesh = new THREE.Mesh(geometry, material);
+    this.scene_.add(mesh);
+    */
 
     this.totalTime_ = 0.0;
   }
