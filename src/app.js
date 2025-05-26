@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
 
 class App {
   constructor() {}
@@ -33,13 +34,21 @@ class App {
     controls.update();
 
     const cubemapLoader = new THREE.CubeTextureLoader();
+    // const texture = cubemapLoader.load([
+    //   "./resources/images/cubemap/Cold_Sunset/Cold_Sunset__Cam_2_Left+X.png",
+    //   "./resources/images/cubemap/Cold_Sunset/Cold_Sunset__Cam_3_Right-X.png",
+    //   "./resources/images/cubemap/Cold_Sunset/Cold_Sunset__Cam_4_Up+Y.png",
+    //   "./resources/images/cubemap/Cold_Sunset/Cold_Sunset__Cam_5_Down-Y.png",
+    //   "./resources/images/cubemap/Cold_Sunset/Cold_Sunset__Cam_0_Front+Z.png",
+    //   "./resources/images/cubemap/Cold_Sunset/Cold_Sunset__Cam_1_Back-Z.png",
+    // ]);
     const texture = cubemapLoader.load([
-      "./resources/images/cubemap/Cold_Sunset__Cam_2_Left+X.png",
-      "./resources/images/cubemap/Cold_Sunset__Cam_3_Right-X.png",
-      "./resources/images/cubemap/Cold_Sunset__Cam_4_Up+Y.png",
-      "./resources/images/cubemap/Cold_Sunset__Cam_5_Down-Y.png",
-      "./resources/images/cubemap/Cold_Sunset__Cam_0_Front+Z.png",
-      "./resources/images/cubemap/Cold_Sunset__Cam_1_Back-Z.png",
+      "./resources/images/cubemap/MilkyWay/GalaxyTex_PositiveX.png",
+      "./resources/images/cubemap/MilkyWay/GalaxyTex_NegativeX.png",
+      "./resources/images/cubemap/MilkyWay/GalaxyTex_NegativeY.png",
+      "./resources/images/cubemap/MilkyWay/GalaxyTex_PositiveY.png",
+      "./resources/images/cubemap/MilkyWay/GalaxyTex_PositiveZ.png",
+      "./resources/images/cubemap/MilkyWay/GalaxyTex_NegativeZ.png",
     ]);
 
     this.scene_.background = texture;
@@ -54,9 +63,17 @@ class App {
   async setupProject_() {
     const vert_shader = await fetch("./resources/shaders/vert.glsl");
     const frag_shader = await fetch("./resources/shaders/frag.glsl");
+    const atmosphere_vert_shader = await fetch(
+      "./resources/shaders/atmosphere_vert.glsl"
+    );
+    const atmosphere_frag_shader = await fetch(
+      "./resources/shaders/atmosphere_frag.glsl"
+    );
 
     const loader = new THREE.TextureLoader();
     const quincyTexture = loader.load("./resources/images/quincy.jpg");
+    const earth2kTexture = loader.load("./resources/images/earth2k.jpg");
+    const earthNormal8k = loader.load("./resources/images/earthNormal8k.png");
     // const overlayTexture = loader.load("./resources/images/overlay.png");
 
     const material = new THREE.ShaderMaterial({
@@ -67,11 +84,23 @@ class App {
         // },
         time: { value: 0.0 },
         specMap: { value: this.scene_.background },
+        diffuse: { value: earth2kTexture },
+        normalMap: { value: earthNormal8k },
       },
       vertexShader: await vert_shader.text(),
       fragmentShader: await frag_shader.text(),
     });
+    material.App;
+
     this.material_ = material;
+
+    const atmosphereMaterial = new THREE.ShaderMaterial({
+      uniforms: {},
+      vertexShader: await atmosphere_vert_shader.text(),
+      fragmentShader: await atmosphere_frag_shader.text(),
+    });
+    // atmosphereMaterial.opacity = 0.5;
+    atmosphereMaterial.transparent = true;
 
     // const geometry = new THREE.PlaneGeometry(1, 1);
 
@@ -79,20 +108,26 @@ class App {
     // plane.position.set(0.5, 0.5, 0);
     // this.scene_.add(plane);
 
-    /*
-    const gltfLoader = new GLTFLoader();
-    gltfLoader.setPath("/resources/models/");
-    gltfLoader.load("suzanne.glb", (gltf) => {
-      gltf.scene.traverse((c) => {
-        c.material = material;
-      });
-      this.scene_.add(gltf.scene);
-    });
-    */
+    // const gltfLoader = new GLTFLoader();
+    // gltfLoader.setPath("/resources/models/");
+    // gltfLoader.load("suzanne.glb", (gltf) => {
+    //   gltf.scene.traverse((c) => {
+    //     c.material = material;
+    //   });
+    //   this.scene_.add(gltf.scene);
+    // });
 
-    const geometry = new THREE.IcosahedronGeometry(1, 128);
+    const geometry = new THREE.SphereGeometry(1, 128, 128);
+    geometry.computeTangents(); // Compute tangents for normal map
     const mesh = new THREE.Mesh(geometry, material);
     this.scene_.add(mesh);
+
+    const atmosphereGeometry = new THREE.SphereGeometry(1.1, 128, 128);
+    const atmosphereMesh = new THREE.Mesh(
+      atmosphereGeometry,
+      atmosphereMaterial
+    );
+    this.scene_.add(atmosphereMesh);
 
     /*
     const geometry = new THREE.BoxGeometry(1, 1);

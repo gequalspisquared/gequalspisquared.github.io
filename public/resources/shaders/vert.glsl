@@ -1,7 +1,9 @@
+attribute vec4 tangent;
 varying vec2 vUvs;
 varying vec3 vNormal;
 varying vec3 vPosition;
 varying vec3 vColor;
+varying vec4 vTangent;
 
 uniform float time;
 
@@ -50,17 +52,19 @@ mat3 rotateZ(float radians) {
 void main() {
     vec3 localPosition = position;
 
-    float t = sin(localPosition.y * 20.0 + time * 10.0);
-    t = remap(t, -1.0, 1.0, 0.0, 0.2);
-    localPosition += normal * t;
+    // float t = sin(localPosition.y * 20.0 + time * 10.0);
+    // t = remap(t, -1.0, 1.0, 0.0, 0.2);
+    // localPosition += normal * t;
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(localPosition, 1.0);
     vUvs = uv;
-    vNormal = (modelMatrix * vec4(normal, 0.0)).xyz;
+    // vNormal = (modelMatrix * vec4(normal, 0.0)).xyz;
+    vNormal = normal;
     vPosition = (modelMatrix * vec4(position, 1.0)).xyz;
-    vColor = mix(
-        vec3(0.0, 0.0, 0.5),
-        vec3(0.1, 0.5, 0.8),
-        smoothstep(0.0, 0.2, t)
-    );
+    vTangent = tangent;
+    // vColor = mix(
+    //     vec3(0.0, 0.0, 0.5),
+    //     vec3(0.1, 0.5, 0.8),
+    //     smoothstep(0.0, 0.2, t)
+    // );
 }
